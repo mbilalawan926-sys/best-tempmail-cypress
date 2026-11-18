@@ -1,6 +1,6 @@
 {
   "name": "best-tempmail-cypress",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Disposable email inboxes for Cypress. Create a throwaway address, wait for the email, and get the verification code or the link to click.",
   "keywords": [
     "cypress",
