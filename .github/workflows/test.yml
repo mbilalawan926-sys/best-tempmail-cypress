@@ -8,11 +8,26 @@ on:
 
 jobs:
   mocked:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # bash on Windows too, so the inline node checks below are written
+        # once. npm still resolves package scripts through cmd.exe there,
+        # which is the thing being tested.
+        shell: bash
     strategy:
       matrix:
+        os: [ubuntu-latest]
         # The oldest version package.json claims to support, and current.
         node: ["18", "20", "22"]
+        include:
+          # Windows earns a place in the matrix: npm runs package scripts
+          # through cmd.exe there, which does not expand globs. A glob in the
+          # test script passed on Linux and macOS and failed on Windows, which
+          # is the one platform the author actually develops on. This job is
+          # what would have caught it.
+          - os: windows-latest
+            node: "22"
     steps:
       - uses: actions/checkout@v5
 
