@@ -1,0 +1,66 @@
+{
+  "name": "best-tempmail-cypress",
+  "version": "0.1.0",
+  "description": "Disposable email inboxes for Cypress. Create a throwaway address, wait for the email, and get the verification code or the link to click.",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "email",
+    "email-testing",
+    "disposable-email",
+    "temporary-email",
+    "temp-mail",
+    "otp",
+    "email-verification",
+    "testing",
+    "e2e",
+    "qa"
+  ],
+  "homepage": "https://best-tempmail.com/api",
+  "bugs": "https://github.com/mbilalawan926-sys/best-tempmail-cypress/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbilalawan926-sys/best-tempmail-cypress.git"
+  },
+  "license": "MIT",
+  "author": "best-tempmail.com",
+  "type": "commonjs",
+  "main": "./index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.js"
+    },
+    "./commands": {
+      "types": "./types/commands.d.ts",
+      "import": "./commands.mjs",
+      "require": "./commands.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "commands.js",
+    "commands.mjs",
+    "src/",
+    "types/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "cypress": ">=12"
+  },
+  "peerDependenciesMeta": {
+    "cypress": {
+      "optional": true
+    }
+  }
+}

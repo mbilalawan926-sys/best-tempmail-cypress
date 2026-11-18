@@ -1,0 +1,76 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  mocked:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The oldest version package.json claims to support, and current.
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      # No install step: the package has no dependencies and neither does its
+      # test suite.
+      - name: test
+        run: npm test
+
+      - name: the published file list must resolve
+        run: |
+          # npm pack --dry-run fails if a path in "files" does not exist, which
+          # is how a published package ends up missing its own entry point.
+          npm pack --dry-run
+
+      - name: both entry points must load
+        run: |
+          node -e "
+            const cjs = require('./index.js');
+            if (typeof cjs.bestTempMail !== 'function') throw new Error('CJS entry is broken');
+            console.log('CommonJS entry OK');
+          "
+          node --input-type=module -e "
+            import { bestTempMail } from './index.mjs';
+            if (typeof bestTempMail !== 'function') throw new Error('ESM entry is broken');
+            console.log('ESM entry OK');
+          "
+
+  live:
+    name: live API
+    runs-on: ubuntu-latest
+    # A pull request from a fork cannot read repository secrets, so this job
+    # would skip and report success, which is the worst of both worlds. Run it
+    # on pushes to main and on demand only.
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      # Without this, a missing secret makes the live script skip and the job
+      # go green, which is the same failure mode as a test that passes because
+      # no email ever arrived. Fail loudly instead.
+      - name: the secret must be present
+        env:
+          BTM_API_KEY: ${{ secrets.BEST_TEMPMAIL_KEY }}
+        run: |
+          if [ -z "$BTM_API_KEY" ]; then
+            echo "::error::BEST_TEMPMAIL_KEY is not set on this repository, so the live check would silently skip. Add it under Settings, Secrets and variables, Actions."
+            exit 1
+          fi
+
+      - name: test against the real API
+        env:
+          BTM_API_KEY: ${{ secrets.BEST_TEMPMAIL_KEY }}
+        run: node scripts/live-check.js
